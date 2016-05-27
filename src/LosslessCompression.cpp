@@ -62,7 +62,7 @@ std::vector<uint8_t> CR::DataCompression::Compress(const void* a_src, uint32_t a
 	case LosslessCoompressionLevel::Medium:
 		header->CompressedSize = bound;
 		compress2((Bytef*)result.data() + sizeof(CompressionHeader), (uLongf*)&header->CompressedSize,
-			(const Bytef*)a_src, (int)a_srcSize, 9);
+			(const Bytef*)a_src, (int)a_srcSize, 7);
 		break;
 	case LosslessCoompressionLevel::High:
 		size_t propSize = LZMA_PROPS_SIZE;
