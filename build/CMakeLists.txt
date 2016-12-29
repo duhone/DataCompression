@@ -6,6 +6,7 @@ include_directories("${PROJECT_SOURCE_DIR}/../../3rdParty/catch")
 include_directories("${PROJECT_SOURCE_DIR}/../../3rdParty/lz4/lib")
 include_directories("${PROJECT_SOURCE_DIR}/../../3rdParty/zlib")
 include_directories("${PROJECT_SOURCE_DIR}/../../3rdParty/lzma/c")
+include_directories("${PROJECT_SOURCE_DIR}/../../3rdParty/zstd/lib")
 include_directories("${PROJECT_SOURCE_DIR}/../../core/inc")
 include_directories("${PROJECT_SOURCE_DIR}/../../platform/inc")
 
@@ -37,13 +38,13 @@ if(IncludeTests)
 	###############################################
 	#unit tests
 	###############################################
-	file(GLOB_RECURSE dc_test_inc "${PROJECT_SOURCE_DIR}/../tests/*.h")
-	file(GLOB_RECURSE dc_test_src1 "${PROJECT_SOURCE_DIR}/../tests/*.cpp")
-	list(APPEND dc_test_src ${dc_test_inc})
-	list(APPEND dc_test_src ${dc_test_src1})
+	set(dc_test_src
+		${PROJECT_SOURCE_DIR}/../tests/BasicCompression.cpp
+		${PROJECT_SOURCE_DIR}/../tests/main.cpp
+	)
 	
 	add_executable(DataCompression_tests $<TARGET_OBJECTS:DataCompression> $<TARGET_OBJECTS:platform> 
-		$<TARGET_OBJECTS:core> $<TARGET_OBJECTS:lz4> $<TARGET_OBJECTS:zlib> $<TARGET_OBJECTS:lzma> ${dc_test_src})
+		$<TARGET_OBJECTS:core> $<TARGET_OBJECTS:lz4> $<TARGET_OBJECTS:zlib> $<TARGET_OBJECTS:lzma> $<TARGET_OBJECTS:zstd> ${dc_test_src})
 						
 	set_property(TARGET DataCompression_tests APPEND PROPERTY FOLDER tests)
 	set_property(TARGET DataCompression_tests APPEND PROPERTY COMPILE_FLAGS "-WX -W4")
