@@ -26,6 +26,7 @@ namespace
 	}; 
 	#pragma pack()
 }
+
 std::vector<uint8_t> CR::DataCompression::Compress(const void* a_src, uint32_t a_srcSize,
 	LosslessCompressionLevel a_level)
 {
@@ -36,19 +37,18 @@ std::vector<uint8_t> CR::DataCompression::Compress(const void* a_src, uint32_t a
 	switch (a_level)
 	{
 	case LosslessCompressionLevel::Fast:
-		bound = LZ4_compressBound((int)a_srcSize);
-		break;
 	case LosslessCompressionLevel::Mixed:
 		bound = LZ4_compressBound((int)a_srcSize);
 		break;
 	case LosslessCompressionLevel::Medium:
-		bound = compressBound(a_srcSize);
-		break;
 	case LosslessCompressionLevel::High:
+		bound = (int)ZSTD_compressBound(a_srcSize);
+		break;
+	case LosslessCompressionLevel::Archive:
 		bound = a_srcSize + a_srcSize / 2 + LZMA_PROPS_SIZE; //pulled 1.5 from some old code of mine, no clue where it comes from
 		break;
-	case LosslessCompressionLevel::Test:
-		bound = (int)ZSTD_compressBound(a_srcSize);
+	case LosslessCompressionLevel::ZLIB:
+		bound = compressBound(a_srcSize);
 		break;
 	};
 	result.resize(bound+sizeof(CompressionHeader));
@@ -66,22 +66,26 @@ std::vector<uint8_t> CR::DataCompression::Compress(const void* a_src, uint32_t a
 			(int)a_srcSize, bound, 9);
 		break;
 	case LosslessCompressionLevel::Medium:
-		header->CompressedSize = bound;
-		compress2((Bytef*)result.data() + sizeof(CompressionHeader), (uLongf*)&header->CompressedSize,
-			(const Bytef*)a_src, (int)a_srcSize, 7);
+		header->CompressedSize = (uint32_t)ZSTD_compress(result.data() + sizeof(CompressionHeader), bound,
+			a_src, a_srcSize, 3);
 		break;
 	case LosslessCompressionLevel::High:
+		header->CompressedSize = (uint32_t)ZSTD_compress(result.data() + sizeof(CompressionHeader), bound,
+			a_src, a_srcSize, 18);
+		break;
+	case LosslessCompressionLevel::Archive:
 	{
 		size_t propSize = LZMA_PROPS_SIZE;
 		size_t compressedSize = bound - LZMA_PROPS_SIZE;
 		LzmaCompress(data(result) + LZMA_PROPS_SIZE + sizeof(CompressionHeader), &compressedSize, (const unsigned char*)a_src, a_srcSize,
-			data(result) + sizeof(CompressionHeader), &propSize, 5, (unsigned int)256_Kb, -1, -1, -1, -1, -1);
+			data(result) + sizeof(CompressionHeader), &propSize, 9, (unsigned int)4_Mb, -1, -1, -1, -1, -1);
 		header->CompressedSize = (uint32_t)compressedSize + LZMA_PROPS_SIZE;
 	}
 		break;
-	case LosslessCompressionLevel::Test:
-		header->CompressedSize = (uint32_t)ZSTD_compress(result.data() + sizeof(CompressionHeader), bound,
-			a_src, a_srcSize, 0);
+	case LosslessCompressionLevel::ZLIB:
+		header->CompressedSize = bound;
+		compress2((Bytef*)result.data() + sizeof(CompressionHeader), (uLongf*)&header->CompressedSize,
+			(const Bytef*)a_src, (int)a_srcSize, 7);
 		break;
 	};
 	result.resize(header->CompressedSize + sizeof(CompressionHeader));
@@ -108,21 +112,17 @@ std::vector<uint8_t> CR::DataCompression::Decompress(const void* a_src, uint32_t
 	switch (header->CompLevel)
 	{
 	case LosslessCompressionLevel::Fast:
-		bytesRead = LZ4_decompress_fast((const char *)a_src + sizeof(CompressionHeader), (char*)data(result),
-			header->DecompressedSize);
-		break;
 	case LosslessCompressionLevel::Mixed:
 		bytesRead = LZ4_decompress_fast((const char *)a_src + sizeof(CompressionHeader), (char*)data(result),
 			header->DecompressedSize);
 		break;
 	case LosslessCompressionLevel::Medium:
-		bytesRead = header->DecompressedSize;
-		uncompress((Bytef*)data(result), (uLongf*)&bytesRead,
-			(const Bytef*)a_src + sizeof(CompressionHeader), header->CompressedSize);
+	case LosslessCompressionLevel::High:
+		bytesRead = (int)ZSTD_decompress(data(result), header->DecompressedSize, (char*)a_src + sizeof(CompressionHeader), header->CompressedSize);
 		if (bytesRead == (int)header->DecompressedSize)
 			bytesRead = header->CompressedSize;
 		break;
-	case LosslessCompressionLevel::High:
+	case LosslessCompressionLevel::Archive:
 	{
 		size_t decompSize = header->DecompressedSize;
 		size_t srcSize = a_srcSize - LZMA_PROPS_SIZE;
@@ -131,8 +131,10 @@ std::vector<uint8_t> CR::DataCompression::Decompress(const void* a_src, uint32_t
 		bytesRead = (int)srcSize + LZMA_PROPS_SIZE;
 	}
 		break;
-	case LosslessCompressionLevel::Test:
-		bytesRead = (int)ZSTD_decompress(data(result), header->DecompressedSize, (char*)a_src + sizeof(CompressionHeader), header->CompressedSize);
+	case LosslessCompressionLevel::ZLIB:
+		bytesRead = header->DecompressedSize;
+		uncompress((Bytef*)data(result), (uLongf*)&bytesRead,
+			(const Bytef*)a_src + sizeof(CompressionHeader), header->CompressedSize);
 		if (bytesRead == (int)header->DecompressedSize)
 			bytesRead = header->CompressedSize;
 		break;

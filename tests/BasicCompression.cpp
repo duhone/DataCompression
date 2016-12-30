@@ -34,11 +34,12 @@ TEST_CASE("basic compression", "lossless")
 			printf("compression ration %0.2f\n\n", ((float)decompressedData.size() / compressedData.size()));
 		};
 
-		test1("txt lz4 fast", LosslessCompressionLevel::Fast);;
-		//test1("txt lz4 mixed", LosslessCompressionLevel::Mixed);
-		//test1("txt zlib", LosslessCompressionLevel::Medium);
-		//test1("txt lzma", LosslessCompressionLevel::High);
-		test1("txt lzma", LosslessCompressionLevel::Test);
+		test1("fast: lz4", LosslessCompressionLevel::Fast);;
+		test1("mixed: lz4 hc", LosslessCompressionLevel::Mixed);
+		test1("medium: zstd 3", LosslessCompressionLevel::Medium);
+		test1("high: zstd 18", LosslessCompressionLevel::High);
+		test1("archive: lzma", LosslessCompressionLevel::Archive);
+		test1("zlib", LosslessCompressionLevel::ZLIB);
 	};
 
 	const char* testFiles[] = {
