@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 project (DataCompression)
 
 add_subdirectory("${PROJECT_SOURCE_DIR}/../../platform/build" "${PROJECT_SOURCE_DIR}/../../platform_build")
+add_subdirectory("${PROJECT_SOURCE_DIR}/../../math/build" "${PROJECT_SOURCE_DIR}/../../math_build")
 include_directories("${PROJECT_SOURCE_DIR}/../../3rdParty/catch")
 include_directories("${PROJECT_SOURCE_DIR}/../../3rdParty/lz4/lib")
 include_directories("${PROJECT_SOURCE_DIR}/../../3rdParty/zlib")
