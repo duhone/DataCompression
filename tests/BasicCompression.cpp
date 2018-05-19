@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "LosslessCompression.h"
+#include "DataCompression\LosslessCompression.h"
 #include <Platform\MemoryMappedFile.h>
 #include <Platform\PathUtils.h>
 #include <core\Timer.h>
@@ -43,13 +43,13 @@ TEST_CASE("basic compression", "lossless")
 	};
 
 	const char* testFiles[] = {
-		"../../DataCompression/tests/data/alice29.txt",
-		"../../DataCompression/tests/data/cp.html",
-		"../../DataCompression/tests/data/data.xml",
-		"../../DataCompression/tests/data/game.cpp",
-		"../../DataCompression/tests/data/TitleThemeRemix.wav",
-		"../../DataCompression/tests/data/bumble_tales.tga",
-		"../../DataCompression/tests/data/kodim23.tga"
+		"./alice29.txt",
+		"./cp.html",
+		"./data.xml",
+		"./game.cpp",
+		"./TitleThemeRemix.wav",
+		"./bumble_tales.tga",
+		"./kodim23.tga"
 	};
 
 	for(const auto & testFile : testFiles)
