@@ -33,9 +33,6 @@ set(DC_TEST_SRCS
 	add_executable(datacompression_tests $<TARGET_OBJECTS:core>
 						$<TARGET_OBJECTS:platform> 
 						$<TARGET_OBJECTS:datacompression>
-						$<TARGET_OBJECTS:lz4>
-						$<TARGET_OBJECTS:zlib>
-						$<TARGET_OBJECTS:lzma>
 						$<TARGET_OBJECTS:zstd> 
 						${DC_TEST_SRCS})
 						

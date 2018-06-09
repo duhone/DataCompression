@@ -19,7 +19,7 @@ TEST_CASE("basic compression", "lossless")
 		vector<uint8_t> compressedData;
 		vector<uint8_t> decompressedData;
 
-		auto test1 = [&](const char* label, LosslessCompressionLevel level) {
+		auto test1 = [&](const char* label, uint32_t level) {
 			printf("%s mode\n", label);
 			{
 				CR::Core::ScopedTimer time("compress time");
@@ -34,12 +34,14 @@ TEST_CASE("basic compression", "lossless")
 			printf("compression ration %0.2f\n\n", ((float)decompressedData.size() / compressedData.size()));
 		};
 
-		test1("fast: lz4", LosslessCompressionLevel::Fast);;
-		test1("mixed: lz4 hc", LosslessCompressionLevel::Mixed);
-		test1("medium: zstd 3", LosslessCompressionLevel::Medium);
-		test1("high: zstd 18", LosslessCompressionLevel::High);
-		test1("archive: lzma", LosslessCompressionLevel::Archive);
-		test1("zlib", LosslessCompressionLevel::ZLIB);
+		test1("level 0", 0);
+    test1("level 3", 3);
+    test1("level 6", 6);
+    test1("level 9", 9);
+    test1("level 12", 12);
+    test1("level 15", 15);
+    test1("level 18", 18);
+    test1("level 22", 22);
 	};
 
 	const char* testFiles[] = {
