@@ -21,8 +21,7 @@ namespace {
 }
 
 std::vector<uint8_t> CR::DataCompression::Compress(const void* a_src, uint32_t a_srcSize,
-  uint32_t a_level) {
-  a_src; a_srcSize; a_level;
+  int32_t a_level) {
   std::vector<uint8_t> result;
 
   int bound = (int)ZSTD_compressBound(a_srcSize);

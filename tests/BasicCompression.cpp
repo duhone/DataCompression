@@ -19,7 +19,7 @@ TEST_CASE("basic compression", "lossless")
 		vector<uint8_t> compressedData;
 		vector<uint8_t> decompressedData;
 
-		auto test1 = [&](const char* label, uint32_t level) {
+		auto test1 = [&](const char* label, int32_t level) {
 			printf("%s mode\n", label);
 			{
 				CR::Core::ScopedTimer time("compress time");
@@ -34,7 +34,9 @@ TEST_CASE("basic compression", "lossless")
 			printf("compression ration %0.2f\n\n", ((float)decompressedData.size() / compressedData.size()));
 		};
 
-		test1("level 0", 0);
+    test1("level -5", -5);
+    test1("level -1", -1);
+		test1("level 1", 1);
     test1("level 3", 3);
     test1("level 6", 6);
     test1("level 9", 9);
