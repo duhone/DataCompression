@@ -14,6 +14,5 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/build.cmake)
 include (${CMAKE_CURRENT_SOURCE_DIR}/../../3rdParty/build/build_catch.cmake)
 include (${CMAKE_CURRENT_SOURCE_DIR}/../../3rdParty/build/build_zstd.cmake)
 include (${CMAKE_CURRENT_SOURCE_DIR}/../../core/build/build.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../../math/build/build.cmake)
 include (${CMAKE_CURRENT_SOURCE_DIR}/../../platform/build/build.cmake)
 
