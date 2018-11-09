@@ -34,6 +34,7 @@ set(DC_TEST_SRCS
 						$<TARGET_OBJECTS:platform> 
 						$<TARGET_OBJECTS:datacompression>
 						$<TARGET_OBJECTS:zstd> 
+						$<TARGET_OBJECTS:fmt> 
 						${DC_TEST_SRCS})
 						
 	source_group("Source" FILES ${DC_TEST_SRCS})
