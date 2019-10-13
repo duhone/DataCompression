@@ -14,8 +14,8 @@ namespace {
 	struct CompressionHeader {
 		int FourCC{c_CompFourCC};
 		uint32_t Version{c_CompVersion};
-		uint32_t DecompressedSize;
-		uint32_t CompressedSize;
+		uint32_t DecompressedSize{0};
+		uint32_t CompressedSize{0};
 	};
 #pragma pack()
 }    // namespace
