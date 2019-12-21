@@ -1,45 +1,63 @@
-include_directories("${CMAKE_CURRENT_LIST_DIR}/../inc")
+set(datacompression_root "${CMAKE_CURRENT_LIST_DIR}/..")
 
 ###############################################
 #library
 ###############################################
 set(DC_PUBLIC_HDRS
-    ${CMAKE_CURRENT_LIST_DIR}/../inc/DataCompression/LosslessCompression.h
+    ${datacompression_root}/inc/DataCompression/LosslessCompression.h
 )
 
 set(DC_SRCS
-    ${CMAKE_CURRENT_LIST_DIR}/../src/LosslessCompression.cpp
+    ${datacompression_root}/src/LosslessCompression.cpp
 )
 
 set(DC_BUILD
-    ${CMAKE_CURRENT_LIST_DIR}/../build/build.cmake
+    ${datacompression_root}/build/build.cmake
 )
 
-add_library(datacompression OBJECT  ${DC_PUBLIC_HDRS} ${DC_SRCS} ${DC_BUILD})
+add_library(datacompression OBJECT  
+	${DC_PUBLIC_HDRS} 
+	${DC_SRCS} 
+	${DC_BUILD}
+)
 						
 source_group("Public Headers" FILES ${DC_PUBLIC_HDRS})
 source_group("Source" FILES ${DC_SRCS})
 source_group("Build" FILES ${DC_BUILD})
-				
+		
+target_include_directories(datacompression PUBLIC
+	"${datacompression_root}/inc"
+)
+	
+target_link_libraries(datacompression 
+	zstd
+	core
+	platform
+)
+	
 if(IncludeTests)
 	###############################################
 	#unit tests
 	###############################################
 set(DC_TEST_SRCS
-    ${CMAKE_CURRENT_LIST_DIR}/../tests/BasicCompression.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../tests/Main.cpp
+    ${datacompression_root}/tests/BasicCompression.cpp
+    ${datacompression_root}/tests/Main.cpp
 )
 	
-	add_executable(datacompression_tests $<TARGET_OBJECTS:core>
-						$<TARGET_OBJECTS:platform> 
-						$<TARGET_OBJECTS:datacompression>
-						$<TARGET_OBJECTS:zstd> 
-						$<TARGET_OBJECTS:fmt> 
-						${DC_TEST_SRCS})
+	add_executable(datacompression_tests ${DC_TEST_SRCS})
 						
 	source_group("Source" FILES ${DC_TEST_SRCS})
 						
 	set_property(TARGET datacompression_tests APPEND PROPERTY FOLDER tests)
+	
+	target_link_libraries(datacompression_tests 
+		catch
+		fmt
+		zstd
+		core
+		platform
+		datacompression
+	)
 	
 	add_custom_command(TARGET datacompression_tests POST_BUILD        
     COMMAND ${CMAKE_COMMAND} -E copy_if_different  
