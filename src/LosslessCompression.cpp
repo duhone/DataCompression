@@ -20,8 +20,8 @@ namespace {
 #pragma pack()
 }    // namespace
 
-std::vector<uint8_t> CR::DataCompression::Compress(const void* a_src, uint32_t a_srcSize, int32_t a_level) {
-	std::vector<uint8_t> result;
+std::vector<std::byte> CR::DataCompression::Compress(const void* a_src, uint32_t a_srcSize, int32_t a_level) {
+	std::vector<std::byte> result;
 
 	int bound = (int)ZSTD_compressBound(a_srcSize);
 
@@ -37,8 +37,8 @@ std::vector<uint8_t> CR::DataCompression::Compress(const void* a_src, uint32_t a
 	return result;
 }
 
-std::vector<uint8_t> CR::DataCompression::Decompress(const void* a_src, uint32_t a_srcSize) {
-	std::vector<uint8_t> result;
+std::vector<std::byte> CR::DataCompression::Decompress(const void* a_src, uint32_t a_srcSize) {
+	std::vector<std::byte> result;
 	if(a_srcSize < sizeof(CompressionHeader)) return result;
 
 	auto* header = reinterpret_cast<const CompressionHeader*>(a_src);
