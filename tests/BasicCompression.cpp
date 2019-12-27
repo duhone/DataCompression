@@ -1,9 +1,9 @@
 #include "catch.hpp"
 
 #include "DataCompression\LosslessCompression.h"
-#include <Platform\MemoryMappedFile.h>
-#include <Platform\PathUtils.h>
-#include <core\Timer.h>
+#include "Platform\MemoryMappedFile.h"
+#include "Platform\PathUtils.h"
+#include "core\Timer.h"
 
 using namespace std;
 using namespace CR::DataCompression;
@@ -12,12 +12,12 @@ using namespace CR::Platform;
 TEST_CASE("basic compression", "lossless") {
 	auto test = [](const char* testFile) {
 		printf("%s test\n", testFile);
-		auto testFilePath = RelativeToAbsolute(testFile);
+		auto testFilePath = GetCurrentProcessPath() / testFile;
 		auto testFileMMap = OpenMMapFile(testFilePath.c_str());
 
-		vector<uint8_t> sourceData(testFileMMap->data(), testFileMMap->data() + testFileMMap->size());
-		vector<uint8_t> compressedData;
-		vector<uint8_t> decompressedData;
+		vector<byte> sourceData(testFileMMap->data(), testFileMMap->data() + testFileMMap->size());
+		vector<byte> compressedData;
+		vector<byte> decompressedData;
 
 		auto test1 = [&](const char* label, int32_t level) {
 			printf("%s mode\n", label);

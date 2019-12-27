@@ -29,7 +29,7 @@ target_include_directories(datacompression PUBLIC
 	"${datacompression_root}/inc"
 )
 	
-target_link_libraries(datacompression 
+target_link_libraries(datacompression PUBLIC
 	zstd
 	core
 	platform
