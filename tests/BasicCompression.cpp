@@ -1,4 +1,4 @@
-#include "catch.hpp"
+﻿#include <3rdParty/doctest.h>
 
 #include "DataCompression\LosslessCompression.h"
 #include "Platform\MemoryMappedFile.h"
@@ -9,13 +9,13 @@ using namespace std;
 using namespace CR::DataCompression;
 using namespace CR::Platform;
 
-TEST_CASE("basic compression", "lossless") {
+TEST_CASE("basic compression") {
 	auto test = [](const char* testFile) {
 		printf("%s test\n", testFile);
 		auto testFilePath = GetCurrentProcessPath() / testFile;
-		auto testFileMMap = OpenMMapFile(testFilePath.c_str());
+		MemoryMappedFile testFileMMap(testFilePath.c_str());
 
-		vector<byte> sourceData(testFileMMap->data(), testFileMMap->data() + testFileMMap->size());
+		vector<byte> sourceData(testFileMMap.data(), testFileMMap.data() + testFileMMap.size());
 		vector<byte> compressedData;
 		vector<byte> decompressedData;
 
@@ -29,8 +29,8 @@ TEST_CASE("basic compression", "lossless") {
 				CR::Core::ScopedTimer time("decompress time");
 				decompressedData = Decompress(compressedData.data(), (uint32_t)compressedData.size());
 			}
-			REQUIRE(decompressedData.size() == testFileMMap->size());
-			REQUIRE(memcmp(data(decompressedData), testFileMMap->data(), size(compressedData)) == 0);
+			REQUIRE(decompressedData.size() == testFileMMap.size());
+			REQUIRE(memcmp(data(decompressedData), testFileMMap.data(), size(compressedData)) == 0);
 			printf("compression ration %0.2f\n\n", ((float)decompressedData.size() / compressedData.size()));
 		};
 

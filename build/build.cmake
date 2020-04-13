@@ -1,32 +1,34 @@
-set(datacompression_root "${CMAKE_CURRENT_LIST_DIR}/..")
+set(root "${CMAKE_CURRENT_LIST_DIR}/..")
 
 ###############################################
 #library
 ###############################################
-set(DC_PUBLIC_HDRS
-    ${datacompression_root}/inc/DataCompression/LosslessCompression.h
+set(PUBLIC_HDRS
+    ${root}/inc/DataCompression/LosslessCompression.h
 )
 
-set(DC_SRCS
-    ${datacompression_root}/src/LosslessCompression.cpp
+set(SRCS
+    ${root}/src/LosslessCompression.cpp
 )
 
-set(DC_BUILD
-    ${datacompression_root}/build/build.cmake
+set(BUILD
+    ${root}/build/build.cmake
 )
 
 add_library(datacompression OBJECT  
-	${DC_PUBLIC_HDRS} 
-	${DC_SRCS} 
-	${DC_BUILD}
+	${PUBLIC_HDRS} 
+	${SRCS} 
+	${BUILD}
 )
-						
-source_group("Public Headers" FILES ${DC_PUBLIC_HDRS})
-source_group("Source" FILES ${DC_SRCS})
-source_group("Build" FILES ${DC_BUILD})
 		
+settingsCR(datacompression)	
+			
+target_precompile_headers(datacompression PRIVATE 
+	<3rdParty/zstd.h>
+)
+			
 target_include_directories(datacompression PUBLIC
-	"${datacompression_root}/inc"
+	"${root}/inc"
 )
 	
 target_link_libraries(datacompression PUBLIC
@@ -35,72 +37,49 @@ target_link_libraries(datacompression PUBLIC
 	platform
 )
 	
-if(IncludeTests)
-	###############################################
-	#unit tests
-	###############################################
-set(DC_TEST_SRCS
-    ${datacompression_root}/tests/BasicCompression.cpp
-    ${datacompression_root}/tests/Main.cpp
+###############################################
+#unit tests
+###############################################
+set(PUBLIC_HDRS
+)
+
+set(SRCS
+    ${root}/tests/BasicCompression.cpp
+    ${root}/tests/Main.cpp
 )
 	
-	add_executable(datacompression_tests ${DC_TEST_SRCS})
-						
-	source_group("Source" FILES ${DC_TEST_SRCS})
-						
-	set_property(TARGET datacompression_tests APPEND PROPERTY FOLDER tests)
+set(BUILD
+)
+
+add_executable(datacompression_tests ${SRCS})
+				
+settingsCR(datacompression_tests)
+					
+set_property(TARGET datacompression_tests APPEND PROPERTY FOLDER tests)
+
+target_link_libraries(datacompression_tests 
+	doctest
+	fmt
+	zstd
+	core
+	platform
+	datacompression
+)
+
+set(TEST_DATA 
+	"${root}/tests/data/alice29.txt"
+	"${root}/tests/data/bumble_tales.tga" 
+	"${root}/tests/data/cp.html" 
+	"${root}/tests/data/CS-3C1.tga"
+	"${root}/tests/data/data.xml" 
+	"${root}/tests/data/Game.cpp"
+	"${root}/tests/data/kodim23.tga"
+	"${root}/tests/data/lena3.tga"
+	"${root}/tests/data/TitleThemeRemix.wav"
+)
+  
+add_custom_command(TARGET datacompression_tests POST_BUILD        
+COMMAND ${CMAKE_COMMAND} -E copy_if_different  
+	${TEST_DATA}
+	$<TARGET_FILE_DIR:datacompression_tests>)
 	
-	target_link_libraries(datacompression_tests 
-		catch
-		fmt
-		zstd
-		core
-		platform
-		datacompression
-	)
-	
-	add_custom_command(TARGET datacompression_tests POST_BUILD        
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different  
-        "${CMAKE_CURRENT_LIST_DIR}/../tests/data/alice29.txt"
-        $<TARGET_FILE_DIR:datacompression_tests>)
-		
-	add_custom_command(TARGET datacompression_tests POST_BUILD        
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different  
-        "${CMAKE_CURRENT_LIST_DIR}/../tests/data/bumble_tales.tga"
-        $<TARGET_FILE_DIR:datacompression_tests>)
-		
-	add_custom_command(TARGET datacompression_tests POST_BUILD        
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different  
-        "${CMAKE_CURRENT_LIST_DIR}/../tests/data/cp.html"
-        $<TARGET_FILE_DIR:datacompression_tests>)
-		
-	add_custom_command(TARGET datacompression_tests POST_BUILD        
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different  
-        "${CMAKE_CURRENT_LIST_DIR}/../tests/data/CS-3C1.tga"
-        $<TARGET_FILE_DIR:datacompression_tests>)
-		
-	add_custom_command(TARGET datacompression_tests POST_BUILD        
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different  
-        "${CMAKE_CURRENT_LIST_DIR}/../tests/data/data.xml"
-        $<TARGET_FILE_DIR:datacompression_tests>)
-		
-	add_custom_command(TARGET datacompression_tests POST_BUILD        
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different  
-        "${CMAKE_CURRENT_LIST_DIR}/../tests/data/Game.cpp"
-        $<TARGET_FILE_DIR:datacompression_tests>)
-		
-	add_custom_command(TARGET datacompression_tests POST_BUILD        
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different  
-        "${CMAKE_CURRENT_LIST_DIR}/../tests/data/kodim23.tga"
-        $<TARGET_FILE_DIR:datacompression_tests>)
-		
-	add_custom_command(TARGET datacompression_tests POST_BUILD        
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different  
-        "${CMAKE_CURRENT_LIST_DIR}/../tests/data/lena3.tga"
-        $<TARGET_FILE_DIR:datacompression_tests>)
-		
-	add_custom_command(TARGET datacompression_tests POST_BUILD        
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different  
-        "${CMAKE_CURRENT_LIST_DIR}/../tests/data/TitleThemeRemix.wav"
-        $<TARGET_FILE_DIR:datacompression_tests>)
-endif()
