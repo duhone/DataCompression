@@ -23,11 +23,13 @@ TEST_CASE("basic compression") {
 			printf("%s mode\n", label);
 			{
 				CR::Core::ScopedTimer time("compress time");
-				compressedData = Compress(Core::Span(testFileMMap.data(), (uint32_t)testFileMMap.size()), level);
+				compressedData =
+				    Compress(Core::Span<const std::byte>(testFileMMap.data(), (uint32_t)testFileMMap.size()), level);
 			}
 			{
 				CR::Core::ScopedTimer time("decompress time");
-				decompressedData = Decompress(Core::Span(compressedData.data(), (uint32_t)compressedData.size()));
+				decompressedData =
+				    Decompress(Core::Span<const std::byte>(compressedData.data(), (uint32_t)compressedData.size()));
 			}
 			REQUIRE(decompressedData.size() == testFileMMap.size());
 			REQUIRE(memcmp(data(decompressedData), testFileMMap.data(), size(compressedData)) == 0);

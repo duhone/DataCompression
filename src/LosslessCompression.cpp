@@ -24,7 +24,8 @@ namespace {
 #pragma pack()
 }    // namespace
 
-Core::storage_buffer<std::byte> CR::DataCompression::Compress(Core::Span<std::byte> a_src, int32_t a_level) {
+Core::storage_buffer<std::byte> CR::DataCompression::Compress(const Core::Span<const std::byte> a_src,
+                                                              int32_t a_level) {
 	Core::storage_buffer<std::byte> result;
 
 	int bound = (int)ZSTD_compressBound(a_src.size());
@@ -41,7 +42,7 @@ Core::storage_buffer<std::byte> CR::DataCompression::Compress(Core::Span<std::by
 	return result;
 }
 
-Core::storage_buffer<std::byte> CR::DataCompression::Decompress(Core::Span<std::byte> a_src) {
+Core::storage_buffer<std::byte> CR::DataCompression::Decompress(const Core::Span<const std::byte> a_src) {
 	Core::storage_buffer<std::byte> result;
 	if(a_src.size() < sizeof(CompressionHeader)) return result;
 
