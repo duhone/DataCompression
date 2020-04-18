@@ -6,6 +6,7 @@
 #include "core\Timer.h"
 
 using namespace std;
+using namespace CR;
 using namespace CR::DataCompression;
 using namespace CR::Platform;
 
@@ -15,19 +16,18 @@ TEST_CASE("basic compression") {
 		auto testFilePath = GetCurrentProcessPath() / testFile;
 		MemoryMappedFile testFileMMap(testFilePath.c_str());
 
-		vector<byte> sourceData(testFileMMap.data(), testFileMMap.data() + testFileMMap.size());
-		vector<byte> compressedData;
-		vector<byte> decompressedData;
+		Core::storage_buffer<byte> compressedData;
+		Core::storage_buffer<byte> decompressedData;
 
 		auto test1 = [&](const char* label, int32_t level) {
 			printf("%s mode\n", label);
 			{
 				CR::Core::ScopedTimer time("compress time");
-				compressedData = Compress(sourceData.data(), (uint32_t)sourceData.size(), level);
+				compressedData = Compress(Core::Span(testFileMMap.data(), (uint32_t)testFileMMap.size()), level);
 			}
 			{
 				CR::Core::ScopedTimer time("decompress time");
-				decompressedData = Decompress(compressedData.data(), (uint32_t)compressedData.size());
+				decompressedData = Decompress(Core::Span(compressedData.data(), (uint32_t)compressedData.size()));
 			}
 			REQUIRE(decompressedData.size() == testFileMMap.size());
 			REQUIRE(memcmp(data(decompressedData), testFileMMap.data(), size(compressedData)) == 0);

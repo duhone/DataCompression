@@ -1,8 +1,12 @@
-#include "DataCompression/LosslessCompression.h"
-#include "core\literals.h"
+﻿#include "DataCompression/LosslessCompression.h"
+
+#include "core/Log.h"
+#include "core/literals.h"
+
 #include <exception>
 #include <zstd.h>
 
+using namespace CR;
 using namespace CR::DataCompression;
 using namespace CR::Core::Literals;
 
@@ -20,39 +24,40 @@ namespace {
 #pragma pack()
 }    // namespace
 
-std::vector<std::byte> CR::DataCompression::Compress(const void* a_src, uint32_t a_srcSize, int32_t a_level) {
-	std::vector<std::byte> result;
+Core::storage_buffer<std::byte> CR::DataCompression::Compress(Core::Span<std::byte> a_src, int32_t a_level) {
+	Core::storage_buffer<std::byte> result;
 
-	int bound = (int)ZSTD_compressBound(a_srcSize);
+	int bound = (int)ZSTD_compressBound(a_src.size());
 
-	result.resize(bound + sizeof(CompressionHeader));
+	result.prepare(bound + sizeof(CompressionHeader));
 	auto header              = new(std::data(result)) CompressionHeader;
-	header->DecompressedSize = a_srcSize;
+	header->DecompressedSize = (uint32_t)a_src.size();
 
 	header->CompressedSize =
-	    (uint32_t)ZSTD_compress(result.data() + sizeof(CompressionHeader), bound, a_src, a_srcSize, a_level);
+	    (uint32_t)ZSTD_compress(result.data() + sizeof(CompressionHeader), bound, a_src.data(), a_src.size(), a_level);
 
-	result.resize(header->CompressedSize + sizeof(CompressionHeader));
+	result.commit(header->CompressedSize + sizeof(CompressionHeader));
 
 	return result;
 }
 
-std::vector<std::byte> CR::DataCompression::Decompress(const void* a_src, uint32_t a_srcSize) {
-	std::vector<std::byte> result;
-	if(a_srcSize < sizeof(CompressionHeader)) return result;
+Core::storage_buffer<std::byte> CR::DataCompression::Decompress(Core::Span<std::byte> a_src) {
+	Core::storage_buffer<std::byte> result;
+	if(a_src.size() < sizeof(CompressionHeader)) return result;
 
-	auto* header = reinterpret_cast<const CompressionHeader*>(a_src);
-	if(header->FourCC != c_CompFourCC) throw std::exception("compressed data has invalid fourcc");
-	if(header->Version != c_CompVersion) throw std::exception("compressed data has invalid version");
-	if(header->CompressedSize > (a_srcSize - sizeof(CompressionHeader)))
-		throw std::exception("compressed data size does not match header");
+	auto* header = reinterpret_cast<const CompressionHeader*>(a_src.data());
+	Core::Log::Require(header->FourCC == c_CompFourCC, "compressed data has invalid fourcc");
+	Core::Log::Require(header->Version == c_CompVersion, "compressed data has invalid version");
+	Core::Log::Require(header->CompressedSize <= a_src.size() - sizeof(CompressionHeader),
+	                   "compressed data size does not match header");
 
-	result.resize(header->DecompressedSize);
+	result.prepare(header->DecompressedSize);
 	int bytesRead = (int)ZSTD_decompress(data(result), header->DecompressedSize,
-	                                     (char*)a_src + sizeof(CompressionHeader), header->CompressedSize);
+	                                     (char*)a_src.data() + sizeof(CompressionHeader), header->CompressedSize);
 
-	if(bytesRead != (int)header->DecompressedSize)
-		throw std::exception("did not decompress the expected amount of data");
+	Core::Log::Require(bytesRead == (int)header->DecompressedSize, "did not decompress the expected amount of data");
+
+	result.commit(header->DecompressedSize);
 
 	return result;
 }
