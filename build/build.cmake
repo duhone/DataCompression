@@ -21,11 +21,8 @@ add_library(datacompression OBJECT
 	${BUILD}
 )
 		
-settingsCR(datacompression)	
-			
-target_precompile_headers(datacompression PRIVATE 
-	<3rdParty/zstd.h>
-)
+settingsCR(datacompression)
+createPCH(datacompression)
 			
 target_include_directories(datacompression PUBLIC
 	"${root}/inc"
@@ -54,6 +51,7 @@ set(BUILD
 add_executable(datacompression_tests ${SRCS})
 				
 settingsCR(datacompression_tests)
+createPCH(datacompression_tests)
 					
 set_property(TARGET datacompression_tests APPEND PROPERTY FOLDER tests)
 
