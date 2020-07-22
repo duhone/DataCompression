@@ -15,14 +15,14 @@ set(BUILD
     ${root}/build/build.cmake
 )
 
-add_library(datacompression OBJECT  
+add_library(datacompression  
 	${PUBLIC_HDRS} 
 	${SRCS} 
 	${BUILD}
 )
 		
 settingsCR(datacompression)
-createPCH(datacompression)
+usePCH(datacompression core)
 			
 target_include_directories(datacompression PUBLIC
 	"${root}/inc"
@@ -51,7 +51,7 @@ set(BUILD
 add_executable(datacompression_tests ${SRCS})
 				
 settingsCR(datacompression_tests)
-createPCH(datacompression_tests)
+usePCH(datacompression_tests core)
 					
 set_property(TARGET datacompression_tests APPEND PROPERTY FOLDER tests)
 
